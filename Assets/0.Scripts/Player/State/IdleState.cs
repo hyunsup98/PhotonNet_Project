@@ -12,7 +12,7 @@ public class IdleState : IState
 
     public void Enter()
     {
-        
+        _playerController.Animator.SetFloat("Speed", 0f);
     }
 
     public void Exit()

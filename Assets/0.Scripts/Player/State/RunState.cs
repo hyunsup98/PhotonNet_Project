@@ -1,14 +1,29 @@
 using UnityEngine;
 
-public class RunState : MonoBehaviour
+public class RunState : IState
 {
-    private void Start()
+    private PlayerController _playerController;
+
+    public RunState(PlayerController playerController)
+    {
+        _playerController = playerController;
+    }
+
+    public void Enter()
+    {
+        _playerController.Animator.SetFloat("Speed", 1f);
+    }
+
+    public void Exit()
     {
         
     }
 
-    private void Update()
+    public void FixedTick()
     {
-        
+    }
+
+    public void Tick()
+    {
     }
 }

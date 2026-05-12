@@ -9,202 +9,49 @@ using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private string roomSceneName = "Room";
-    [SerializeField] private byte maxPlayersPerRoom = 2;
-    [SerializeField] private Button createRoomButton;
-    [SerializeField] private TMP_Text statusText;
-    [SerializeField] private RectTransform roomListContent;
-    [SerializeField] private RectTransform roomRowTemplate;
-    [SerializeField] private TMP_Text emptyRoomListText;
+    [SerializeField] private Button _createRoomButton;      // 빠른 방 생성 버튼
 
-    private bool isJoining;
-    private readonly Dictionary<string, RoomInfo> cachedRooms = new Dictionary<string, RoomInfo>();
+    [SerializeField] private Transform _roomListParent;     // 방 목록이 표시될 부모 트랜스폼
+    [SerializeField] private RoomSlot _roomPrefab;          // 방 슬롯 프리팹
+
+    private Dictionary<string, RoomInfo> _cachedRoomDic = new Dictionary<string, RoomInfo>();   // 방 목록 캐시 딕셔너리
 
     private void Start()
     {
-        if (roomRowTemplate != null)
-        {
-            roomRowTemplate.gameObject.SetActive(false);
-        }
-
-        SetStatus(PhotonNetwork.IsConnectedAndReady ? "Lobby Ready" : "Connecting...");
-        SetButtonInteractable(PhotonNetwork.IsConnectedAndReady);
-        RefreshRoomList();
-
-        if (PhotonNetwork.IsConnectedAndReady)
+        if (!PhotonNetwork.InLobby)
         {
             PhotonNetwork.JoinLobby();
         }
     }
 
-    public override void OnConnectedToMaster()
+    // 빠른 방 생성 버튼 클릭 시 랜덤한 방 이름으로 방을 생성 또는 입장
+    public void CreateRoom()
     {
-        PhotonNetwork.JoinLobby();
-        SetStatus("Lobby Ready");
-        SetButtonInteractable(true);
-    }
-
-    public void OnCreateRoomButtonClicked()
-    {
-        if (isJoining || !PhotonNetwork.IsConnectedAndReady)
-        {
-            return;
-        }
-
-        isJoining = true;
-        SetButtonInteractable(false);
-        SetStatus("Finding Room...");
-
-        PhotonNetwork.JoinRandomRoom();
-    }
-
-    public void JoinRoomByName(string roomName)
-    {
-        if (isJoining || !PhotonNetwork.IsConnectedAndReady || string.IsNullOrWhiteSpace(roomName))
-        {
-            return;
-        }
-
-        isJoining = true;
-        SetButtonInteractable(false);
-        SetStatus($"Joining {roomName}...");
-        PhotonNetwork.JoinRoom(roomName);
-    }
-
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
-        foreach (RoomInfo room in roomList)
-        {
-            if (room.RemovedFromList || !room.IsVisible || !room.IsOpen)
-            {
-                cachedRooms.Remove(room.Name);
-                continue;
-            }
-
-            cachedRooms[room.Name] = room;
-        }
-
-        RefreshRoomList();
-    }
-
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {
-        SetStatus("Creating Room...");
-
-        RoomOptions roomOptions = new RoomOptions
-        {
-            MaxPlayers = maxPlayersPerRoom,
-            IsOpen = true,
-            IsVisible = true
-        };
-
-        PhotonNetwork.CreateRoom($"Room_{Guid.NewGuid():N}".Substring(0, 13), roomOptions);
-    }
-
-    public override void OnJoinedRoom()
-    {
-        SetStatus($"Joined Room ({PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})");
-        PhotonNetwork.LoadLevel(roomSceneName);
-    }
-
-    public override void OnCreateRoomFailed(short returnCode, string message)
-    {
-        isJoining = false;
-        SetStatus($"Create Failed: {message}");
-        SetButtonInteractable(true);
-    }
-
-    public override void OnJoinRoomFailed(short returnCode, string message)
-    {
-        isJoining = false;
-        SetStatus($"Join Failed: {message}");
-        SetButtonInteractable(true);
-    }
-
-    private void SetButtonInteractable(bool interactable)
-    {
-        if (createRoomButton != null)
-        {
-            createRoomButton.interactable = interactable;
-        }
-    }
-
-    private void SetStatus(string status)
-    {
-        if (statusText != null)
-        {
-            statusText.text = status;
-        }
+        PhotonNetwork.JoinRandomOrCreateRoom();
     }
 
     private void RefreshRoomList()
     {
-        if (roomListContent == null || roomRowTemplate == null)
-        {
-            return;
-        }
 
-        foreach (Transform child in roomListContent)
-        {
-            if (child != roomRowTemplate)
-            {
-                Destroy(child.gameObject);
-            }
-        }
 
-        List<RoomInfo> openRooms = cachedRooms.Values
-            .Where(room => room.IsOpen && room.IsVisible)
-            .OrderBy(room => room.PlayerCount >= room.MaxPlayers)
-            .ThenBy(room => room.Name)
-            .ToList();
-
-        if (emptyRoomListText != null)
-        {
-            emptyRoomListText.gameObject.SetActive(openRooms.Count == 0);
-        }
-
-        for (int i = 0; i < openRooms.Count; i++)
-        {
-            AddRoomRow(openRooms[i], i);
-        }
     }
 
-    private void AddRoomRow(RoomInfo room, int index)
+    #region 포톤 콜백함수들
+    public override void OnJoinedLobby()
     {
-        RectTransform row = Instantiate(roomRowTemplate, roomListContent);
-        row.gameObject.SetActive(true);
-        row.anchorMin = new Vector2(0f, 1f);
-        row.anchorMax = new Vector2(1f, 1f);
-        row.pivot = new Vector2(0.5f, 1f);
-        row.offsetMin = new Vector2(0f, row.offsetMin.y);
-        row.offsetMax = new Vector2(0f, row.offsetMax.y);
-        row.anchoredPosition = new Vector2(0f, -index * 98f);
-        row.sizeDelta = new Vector2(0f, 86f);
-
-        roomListContent.sizeDelta = new Vector2(roomListContent.sizeDelta.x, Mathf.Max(0f, (index + 1) * 98f));
-
-        TMP_Text nameText = row.Find("Room Name Text")?.GetComponent<TMP_Text>();
-        TMP_Text countText = row.Find("Player Count Text")?.GetComponent<TMP_Text>();
-        Button joinButton = row.GetComponentInChildren<Button>();
-
-        if (nameText != null)
-        {
-            nameText.text = room.Name;
-        }
-
-        if (countText != null)
-        {
-            countText.text = $"{room.PlayerCount}/{room.MaxPlayers} players";
-        }
-
-        if (joinButton != null)
-        {
-            joinButton.interactable = room.PlayerCount < room.MaxPlayers;
-            joinButton.GetComponentInChildren<TMP_Text>().text = room.PlayerCount >= room.MaxPlayers ? "Full" : "Join";
-
-            string roomName = room.Name;
-            joinButton.onClick.RemoveAllListeners();
-            joinButton.onClick.AddListener(() => JoinRoomByName(roomName));
-        }
+        // 로비 입장 시
     }
+
+    public override void OnLeftLobby()
+    {
+        // 로비 퇴장 시
+    }
+
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
+    {
+        // 방 목록 업데이트 시
+
+
+    }
+    #endregion
 }
