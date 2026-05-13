@@ -22,7 +22,11 @@ public class IdleState : IState
 
     public void Tick()
     {
-        
+        if(_playerController.moveDir.sqrMagnitude > 0.1f)
+        {
+            _playerController.ChangeState(_playerController._walkState);
+            Debug.Log(_playerController._currentState);
+        }
     }
 
     public void FixedTick()

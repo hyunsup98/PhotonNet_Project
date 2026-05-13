@@ -1309,13 +1309,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e7ebd0fa43b8684fa2a2b440f38ae28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyManager
-  roomSceneName: Room
-  maxPlayersPerRoom: 2
-  createRoomButton: {fileID: 483453486}
-  statusText: {fileID: 0}
-  roomListContent: {fileID: 283318923}
-  roomSlotPrefab: {fileID: 335159223, guid: c8e0f9e1c2d744c688772a0659e16b1c, type: 3}
-  emptyRoomListText: {fileID: 824942103}
+  _createRoomButton: {fileID: 483453486}
+  _roomListParent: {fileID: 283318923}
+  _roomPrefab: {fileID: 0}
 --- !u!4 &705429093
 Transform:
   m_ObjectHideFlags: 0

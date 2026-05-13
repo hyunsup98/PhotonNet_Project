@@ -84,7 +84,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
         if (enterGameButton != null)
         {
-            enterGameButton.interactable = room.PlayerCount > 0;
+            enterGameButton.interactable = room.PlayerCount > 0 && PhotonNetwork.IsMasterClient;
         }
     }
 

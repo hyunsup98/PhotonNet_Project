@@ -40,22 +40,52 @@ public class PlayerInputHandler : MonoBehaviourPun
     // 이동 로직
     private void Move(InputAction.CallbackContext context)
     {
-        Vector2 inputVector = context.ReadValue<Vector2>();
+        if(context.performed)
+        {
+            Vector2 inputVector = context.ReadValue<Vector2>().normalized;
+            _playerController.moveDir = new Vector3(inputVector.x, 0, inputVector.y);
+
+            OnMove?.Invoke();
+        }
+        else if(context.canceled)
+        {
+            _playerController.moveDir = Vector3.zero;
+        }
     }
     
+    private void Sprint(InputAction.CallbackContext context)
+    {
+        if(context.started)
+        {
+            _playerController._isSprint = true;
+
+            OnSprint?.Invoke();
+        }
+        else if(context.canceled)
+        {
+            _playerController._isSprint = false;
+        }
+    }
+
     // 점프 로직
     private void Jump(InputAction.CallbackContext context)
     {
-        
+        OnJump?.Invoke();
     }
 
     private void OnEnable()
     {
-        
+        _moveAction.performed += Move;
+        _moveAction.canceled += Move;
+        _sprintAction.started += Sprint;
+        _jumpAction.started += Jump;
     }
 
     private void OnDisable()
     {
-        
+        _moveAction.performed -= Move;
+        _moveAction.canceled -= Move;
+        _sprintAction.started -= Sprint;
+        _jumpAction.started -= Jump;
     }
 }

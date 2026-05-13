@@ -32,7 +32,21 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private void RefreshRoomList()
     {
+        // 기존 방 목록 UI 제거
+        foreach (Transform child in _roomListParent)
+        {
+            Destroy(child.gameObject);
+        }
 
+        // 캐시된 방 목록을 기반으로 UI 생성
+        foreach (RoomInfo room in _cachedRoomDic.Values)
+        {
+            if(!room.IsOpen || !room.IsVisible) continue;
+
+            RoomSlot newSlot = Instantiate(_roomPrefab, _roomListParent);
+            newSlot.Initialize(room);
+        }
+        
 
     }
 
@@ -40,18 +54,26 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         // 로비 입장 시
+        RefreshRoomList();
     }
 
     public override void OnLeftLobby()
     {
         // 로비 퇴장 시
+        Debug.Log("로비에서 퇴장하였습니다.");
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         // 방 목록 업데이트 시
+        _cachedRoomDic.Clear();
 
+        foreach(RoomInfo room in roomList)
+        {
+            _cachedRoomDic[room.Name] = room;
+        }
 
+        RefreshRoomList();
     }
     #endregion
 }
