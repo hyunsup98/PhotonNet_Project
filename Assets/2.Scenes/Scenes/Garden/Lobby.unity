@@ -1212,11 +1212,11 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 705429092}
         m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
-        m_MethodName: OnCreateRoomButtonClicked
-        m_Mode: 0
+        m_MethodName: CreateRoom
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1311,7 +1311,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LobbyManager
   _createRoomButton: {fileID: 483453486}
   _roomListParent: {fileID: 283318923}
-  _roomPrefab: {fileID: 0}
+  _roomPrefab: {fileID: 335159223, guid: c8e0f9e1c2d744c688772a0659e16b1c, type: 3}
 --- !u!4 &705429093
 Transform:
   m_ObjectHideFlags: 0

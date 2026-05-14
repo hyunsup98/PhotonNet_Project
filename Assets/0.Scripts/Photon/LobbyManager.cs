@@ -5,6 +5,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
@@ -41,12 +42,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         // 캐시된 방 목록을 기반으로 UI 생성
         foreach (RoomInfo room in _cachedRoomDic.Values)
         {
-            if(!room.IsOpen || !room.IsVisible) continue;
+            if (!room.IsOpen || !room.IsVisible) continue;
 
             RoomSlot newSlot = Instantiate(_roomPrefab, _roomListParent);
             newSlot.Initialize(room);
         }
-        
+
 
     }
 
@@ -63,12 +64,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         Debug.Log("로비에서 퇴장하였습니다.");
     }
 
+    public override void OnJoinedRoom()
+    {
+        SceneManager.LoadScene("Room");
+    }
+
+
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         // 방 목록 업데이트 시
         _cachedRoomDic.Clear();
 
-        foreach(RoomInfo room in roomList)
+        foreach (RoomInfo room in roomList)
         {
             _cachedRoomDic[room.Name] = room;
         }
