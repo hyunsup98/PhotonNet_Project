@@ -18,12 +18,6 @@ public class PlayerInputHandler : MonoBehaviourPun
 
     private void Awake()
     {
-        if(!photonView.IsMine)
-        {
-            enabled = false;
-            return;
-        }
-
         _playerController = GetComponent<PlayerController>();
         _playerInput = GetComponent<PlayerInput>();
 
@@ -75,6 +69,8 @@ public class PlayerInputHandler : MonoBehaviourPun
 
     private void OnEnable()
     {
+        if (!photonView.IsMine) return;
+
         _moveAction.performed += Move;
         _moveAction.canceled += Move;
         _sprintAction.started += Sprint;
@@ -83,6 +79,8 @@ public class PlayerInputHandler : MonoBehaviourPun
 
     private void OnDisable()
     {
+        if (!photonView.IsMine) return;
+
         _moveAction.performed -= Move;
         _moveAction.canceled -= Move;
         _sprintAction.started -= Sprint;

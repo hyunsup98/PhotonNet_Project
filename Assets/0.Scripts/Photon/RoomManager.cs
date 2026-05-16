@@ -42,6 +42,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         RefreshPlayerList();
+        Debug.Log("방장 변경");
     }
 
     // 게임 입장 버튼 클릭 시 Photon 방 상태에 맞게 게임 씬으로 이동한다.

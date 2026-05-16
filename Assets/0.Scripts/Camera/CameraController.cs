@@ -1,8 +1,9 @@
 using System;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CameraController : MonoBehaviour
+public class CameraController : MonoBehaviourPun
 {
     [SerializeField] private PlayerInput _playerInput;  // 마우스 입력을 받아올 인풋 액션
     [SerializeField] private Transform _cameraTransform;
@@ -21,11 +22,18 @@ public class CameraController : MonoBehaviour
 
     private void Awake()
     {
+        if (!photonView.IsMine)
+        {
+            _cameraTransform.gameObject.SetActive(false);
+        }
+
         _lookAction = _playerInput.actions["Look"];
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
+        if (!photonView.IsMine) return;
+        
         float x = lookInput.x * _mouseSensitivity * Time.deltaTime;
         float y = lookInput.y * _mouseSensitivity * Time.deltaTime;
 
@@ -47,12 +55,16 @@ public class CameraController : MonoBehaviour
 
     private void OnEnable()
     {
+        if (!photonView.IsMine) return;
+
         _lookAction.performed += Look;
         _lookAction.canceled += Look;
     }
 
     private void OnDisable()
     {
+        if (!photonView.IsMine) return;
+
         _lookAction.performed -= Look;
         _lookAction.canceled -= Look;
     }

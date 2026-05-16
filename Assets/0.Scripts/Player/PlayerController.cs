@@ -29,16 +29,12 @@ public class PlayerController : MonoBehaviourPun
         PlayerInput = GetComponent<PlayerInputHandler>();
         Animator = GetComponent<Animator>();
         Rigidbody = GetComponent<Rigidbody>();
+        CameraController = GetComponent<CameraController>();
 
         _idleState = new IdleState(this);
         _walkState = new WalkState(this);
 
         ChangeState(_idleState);
-    }
-
-    private void Start()
-    {
-        
     }
 
     private void Update()
